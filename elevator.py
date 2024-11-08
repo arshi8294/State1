@@ -1,4 +1,7 @@
-from abc import ABC, abstractmethod
+# todo: try to find a way to don't show transfers between floors manually
+
+
+from abc import ABC, ABCMeta, abstractmethod
 
 
 class Elevator:
@@ -17,9 +20,21 @@ class Elevator:
         self._state.go_down()
 
 
-class State(ABC):
+class SingletonMeta(ABCMeta):
+    _instances = None
+
+    def __call__(cls, *args, **kwargs):
+        if cls._instances is None:
+            cls._instances = super().__call__(*args, **kwargs)
+        return cls._instances
+
+
+class State(ABC, metaclass=SingletonMeta):
+    FLOORS = []
+
     def __init__(self):
         self._elevator = None
+        self.add_floor()
 
     @abstractmethod
     def set_elevator(self, elevator):
@@ -32,6 +47,9 @@ class State(ABC):
     @abstractmethod
     def go_down(self):
         pass
+
+    def add_floor(self):
+        self.FLOORS.append(self)
 
 
 class GroundFloor(State):
@@ -83,3 +101,6 @@ if __name__ == "__main__":
     elevator.go_down_btn()
     elevator.go_down_btn()
     elevator.go_down_btn()
+
+    print(floor.FLOORS)
+
